@@ -8,7 +8,7 @@ from keyboards import kb_client
 
 #@dp.message_handler(commands=['start', 'help'])
 async def start_bot(message: types.Message):
-    bot_home = 't.me/botname'
+    bot_home = 't.me/small_school_bot'
     try:
         await bot.send_message(message.from_user.id, 'Привет', reply_markup=kb_client)
         await message.delete()
@@ -45,7 +45,7 @@ async def clean_chat(message: types.Message):
 def handlers_register(dp: Dispatcher):
     dp.register_message_handler(start_bot, commands=['start', 'help'])
     dp.register_message_handler(get_contacts, commands=['Контакты'])
-    dp.register_message_handler(get_work_hours, commands=['Режим работы'])
-    dp.register_message_handler(get_training_courses, commands=['Учебные группы'])
+    dp.register_message_handler(get_work_hours, commands=['Режим_работы'])
+    dp.register_message_handler(get_training_courses, commands=['Учебные_группы'])
     dp.register_message_handler(get_trainers_info, commands=['Преподаватели'])
     dp.register_message_handler(clean_chat)
