@@ -15,7 +15,7 @@ dp = Dispatcher(bot)
 
 @dp.message_handler(commands=['start', 'help'])
 async def start_bot(message: types.Message):
-    bot_home = 't.me/small_school_bot'
+    bot_home = 't.me/botname'
     try:
         await bot.send_message(message.from_user.id, 'Привет')
         await bot.delete_message()
