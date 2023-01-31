@@ -1,6 +1,6 @@
 from aiogram import types, Dispatcher
 from create_bot import dp, bot
-
+from keyboards import kb_client
 
 """Хендлеры для взаимодействия с клиентом
 """
@@ -10,7 +10,7 @@ from create_bot import dp, bot
 async def start_bot(message: types.Message):
     bot_home = 't.me/botname'
     try:
-        await bot.send_message(message.from_user.id, 'Привет')
+        await bot.send_message(message.from_user.id, 'Привет', reply_markup=kb_client)
         await message.delete()
     except:
         await message.reply(f'Пожалуйста напишите боту в ЛС: {bot_home}')
