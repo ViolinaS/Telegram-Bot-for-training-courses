@@ -42,7 +42,7 @@ async def clean_chat(message: types.Message):
         await message.delete()
         await bot.send_message(message.from_user.id, 'Бот Вас не понял, пожалуйста воспользуйтесь командами на клавиатуре')
 
-#def handlers_register(dp: Dispatcher):
+def handlers_register(dp: Dispatcher):
     dp.register_message_handler(start_bot, commands=['start', 'help'])
     dp.register_message_handler(get_contacts, commands=['Контакты'])
     dp.register_message_handler(get_work_hours, commands=['Режим работы'])
