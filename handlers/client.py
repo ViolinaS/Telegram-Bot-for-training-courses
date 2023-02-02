@@ -1,4 +1,5 @@
 from aiogram import types, Dispatcher
+from aiogram.dispatcher.filters import Text
 from create_bot import dp, bot
 from keyboards import kb_client
 

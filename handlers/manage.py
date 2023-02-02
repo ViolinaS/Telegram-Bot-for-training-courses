@@ -165,7 +165,7 @@ async def load_name(message: types.Message, state=FSMContext):
 
 
 # Бот ловит ответ и сохраняет в словарь фото учителя
-# @dp.message_handler(content_types=['photo'], state=FSMteacher.photo())
+# @dp.message_handler(content_types=['photo'], state=FSMteacher.photo)
 
 async def load_teacher_photo(message: types.Message, state=FSMContext):
     if message.from_user.id == ID_MASTER or ID_ADMIN:
@@ -214,8 +214,7 @@ def register_handlers_manage(dp: Dispatcher):
     dp.register_message_handler(cancel_state, F.text.contains(
         ['отмена', 'stop']).lower(), state="*")
     dp.register_message_handler(load_title, state=FSMcourses.title)
-    dp.register_message_handler(load_photo, content_types=[
-                                'photo'], state=FSMcourses.photo)
+    dp.register_message_handler(load_photo, content_types=['photo'], state=FSMcourses.photo)
     dp.register_message_handler(load_description, state=FSMcourses.description)
     dp.register_message_handler(load_timetable, state=FSMcourses.timetable)
     dp.register_message_handler(
@@ -226,8 +225,7 @@ def register_handlers_manage(dp: Dispatcher):
     dp.register_message_handler(add_teacher, commands=[
                                 'Внести-Учителя'], state=None)
     dp.register_message_handler(load_name, state=FSMteacher.name)
-    dp.register_message_handler(load_teacher_photo, content_types=[
-                                'photo'], state=FSMteacher.photo())
+    dp.register_message_handler(load_teacher_photo, content_types=['photo'], state=FSMteacher.photo)
     dp.register_message_handler(
         load_teacher_description, state=FSMteacher.description)
     dp.register_message_handler(load_teacher_courses, state=FSMteacher.courses)

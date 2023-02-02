@@ -6,7 +6,7 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
-storage = MemoryStorage
+storage = MemoryStorage()
 bot = Bot(token=os.getenv('Token'))
 dp = Dispatcher(bot, storage=storage)
 
