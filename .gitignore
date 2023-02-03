@@ -131,4 +131,4 @@ dmypy.json
 # env files
 .Environments
 .env
-.test.py
+test.py
