@@ -1,4 +1,5 @@
 from aiogram import types, Dispatcher
+from aiogram.types import chat
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.filters import Text
@@ -9,9 +10,8 @@ from keyboards import kb_manage
 
 """Администрирование Бота через FSM
 Внесение изменений в базу через интерфейс Telegram
-Владелец школы (условный заказчик программы) сможет 
-сам управлять содержимым курсов/тренировок и стоимостью в  
-мобильном телефоне.
+Владелец школы сможет сам управлять содержимым курсов/тренировок
+и стоимостью в мобильном телефоне.
 """
 
 ID_MASTER = master_id
@@ -49,10 +49,20 @@ class FSMteacher(StatesGroup):
 async def verify_admin(message: types.Message):
     global ID_ADMIN
     ID_ADMIN = message.from_user.id
-    chat_admins = await bot.get_chat_administrators(chat_id=message.chat.id)
-    await print(chat_admins)
+    
+    try:
+        chat_admins = await bot.get_chat_administrators(chat_id=message.chat.id)
+        await print(chat_admins)
+    
+    except:
+        print('There are no admins in a private chat')
+        chat_admins = []
+        
+              
     if ID_MASTER and ID_ADMIN in chat_admins or ID_MASTER in chat_admins:
         await bot.send_message(message.from_user.id, 'Готов к работе', reply_markup=kb_manage)
+    else:
+        await bot.send_message(message.from_user.id, 'Доступ запрещен')
     await message.delete()
 
     """Запуск FSM для внесения изменений в курсы/тренировки
