@@ -1,7 +1,8 @@
 from aiogram import types, Dispatcher
 from aiogram.dispatcher.filters import Text
-from create_bot import dp, bot
+from create_bot import dp, bot, bot_address
 from keyboards import kb_client
+
 
 """Хендлеры для взаимодействия с клиентом
 """
@@ -9,7 +10,7 @@ from keyboards import kb_client
 
 #@dp.message_handler(commands=['start', 'help'])
 async def start_bot(message: types.Message):
-    bot_home = 't.me/small_school_bot'
+    bot_home = bot_address # можно указать адрес бота в телеграм строкой 't.me/bot'
     try:
         await bot.send_message(message.from_user.id, 'Привет', reply_markup=kb_client)
         await message.delete()

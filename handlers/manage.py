@@ -3,7 +3,9 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.filters import Text
 from magic_filter import F
-from create_bot import dp, bot
+from create_bot import dp, bot, master_id
+from school_database import sqlite_db
+from keyboards import kb_manage
 
 """Администрирование Бота через FSM
 Внесение изменений в базу через интерфейс Telegram
@@ -12,7 +14,7 @@ from create_bot import dp, bot
 мобильном телефоне.
 """
 
-ID_MASTER = ['указать номер ID владельца бота в телеграме']
+ID_MASTER = master_id
 ID_ADMIN = None
 
 
@@ -50,7 +52,7 @@ async def verify_admin(message: types.Message):
     chat_admins = await bot.get_chat_administrators(chat_id=message.chat.id)
     await print(chat_admins)
     if ID_MASTER and ID_ADMIN in chat_admins or ID_MASTER in chat_admins:
-        await bot.send_message(message.from_user.id, 'Готов к работе')
+        await bot.send_message(message.from_user.id, 'Готов к работе', reply_markup=kb_manage)
     await message.delete()
 
     """Запуск FSM для внесения изменений в курсы/тренировки
@@ -138,10 +140,10 @@ async def load_price(message: types.Message, state=FSMContext):
         async with state.proxy() as data_course:
             data_course['price_of_lesson'] = float(message.text)
 
-        async with state.proxy() as data_course:
-            await message.reply(str(data_course))
+        await sqlite_db.sql_add_command_courses(state)
         await state.finish()
         await message.reply('Загрузка информации об курсе/тренировке окончена')
+
 
     """Запуск FSM для внесения информации об учителях
     """
@@ -194,8 +196,7 @@ async def load_teacher_courses(message: types.Message, state=FSMContext):
         async with state.proxy() as data_teacher:
             data_teacher['courses'] = message.text
 
-        async with state.proxy() as data_teacher:
-            await message.reply(str(data_teacher))
+        await sqlite_db.sql_add_command_teachers(state)
         await state.finish()
         await message.reply('Загрузка информации об учителе окончена')
 
