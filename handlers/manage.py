@@ -1,10 +1,9 @@
 from aiogram import types, Dispatcher
-from aiogram.types import chat
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.filters import Text
 from magic_filter import F
-from create_bot import dp, bot, master_id
+from create_bot import dp, bot, master_id, manage_commands
 from school_database import sqlite_db
 from keyboards import kb_manage
 
@@ -14,9 +13,8 @@ from keyboards import kb_manage
 и стоимостью в мобильном телефоне.
 """
 
-ID_MASTER = master_id
-ID_ADMIN = None
-
+ID_MASTER = int(master_id)
+print('айди', ID_MASTER)
 
 class FSMcourses(StatesGroup):
     title = State()
@@ -34,46 +32,32 @@ class FSMteacher(StatesGroup):
     courses = State()
 
 
-"""Бот проверяет является ли пользователь администратором школьной группы в Телеграм.
-Проверка по ID_ADMIN (получаем ID текущего администратора чата в Телеграм)
+
+"""Бот проверяет является ли пользователь хозяином бота.
+Проверка ID_MASTER по ID на совпадение
 В целях безопасности необходимо установить запрет на добавление Бота в другие группы!
-Одновременно грузить информацию в Бота могут хозяин бота(ID_MASTER) и 
-один администратор(ID_ADMIN), назначенный хозяином.
-Доступ к загрузке информации гарантирован, только если администратор и хозяин бота
-состоят в одной группе и оба являются администраторами группы.
-Доступ также гарантирован для ID-MASTER при отсутствии других администраторов.
 """
 
 
-@dp.message_handler(commands=['moderator'])
-async def verify_admin(message: types.Message):
-    global ID_ADMIN
-    ID_ADMIN = message.from_user.id
-    
-    try:
-        chat_admins = await bot.get_chat_administrators(chat_id=message.chat.id)
-        await print(chat_admins)
-    
-    except:
-        print('There are no admins in a private chat')
-        chat_admins = []
-        
-              
-    if ID_MASTER and ID_ADMIN in chat_admins or ID_MASTER in chat_admins:
+#@dp.message_handler(commands=['moderate'])
+async def verify_owner(message: types.Message):
+    id_check = message.from_user.id
+    if id_check == ID_MASTER:
         await bot.send_message(message.from_user.id, 'Готов к работе', reply_markup=kb_manage)
+        
     else:
         await bot.send_message(message.from_user.id, 'Доступ запрещен')
     await message.delete()
 
-    """Запуск FSM для внесения изменений в курсы/тренировки
-    """
+
+
+"""Запуск FSM для внесения изменений в курсы/тренировки
+"""
 
 # Начало загрузки данных о курсе
-# @dp.message_handler(commands=['Внести-Курс'], state=None)
-
-
+# @dp.message_handler(commands=['загрузить_курс'], state=None)
 async def add_course(message: types.Message):
-    if message.from_user.id == ID_MASTER or ID_ADMIN:
+    if message.from_user.id == ID_MASTER:
         await FSMcourses.title.set()
         await message.reply('Загрузи название курса')
 
@@ -82,8 +66,6 @@ async def add_course(message: types.Message):
 """
 # @dp.message_handler(state="*", commands=['отмена', 'stop'])
 # @dp.message_handler(F.text.contains(['отмена', 'stop']).lower(), state="*")
-
-
 async def cancel_state(message: types.Message, state=FSMContext):
     current_state = await state.get_state()
     if current_state is None:
@@ -96,7 +78,7 @@ async def cancel_state(message: types.Message, state=FSMContext):
 # Бот ловит ответ и пишет в словарь название курса
 # @dp.message_handler(state=FSMcourses.title)
 async def load_title(message: types.Message, state=FSMContext):
-    if message.from_user.id == ID_MASTER or ID_ADMIN:
+    if message.from_user.id == ID_MASTER:
         async with state.proxy() as data_course:
             data_course['title'] = message.text
         await FSMcourses.next()
@@ -106,7 +88,7 @@ async def load_title(message: types.Message, state=FSMContext):
 # Бот ловит ответ и сохраняет в словарь фото курса
 # @dp.message_handler(content_types=['photo'], state=FSMcourses.photo)
 async def load_photo(message: types.Message, state=FSMContext):
-    if message.from_user.id == ID_MASTER or ID_ADMIN:
+    if message.from_user.id == ID_MASTER:
         async with state.proxy() as data_course:
             data_course['photo'] = message.photo[0].file_id
         await FSMcourses.next()
@@ -116,7 +98,7 @@ async def load_photo(message: types.Message, state=FSMContext):
 # Бот ловит ответ и сохраняет в словарь описание курса
 # @dp.message_handler(state=FSMcourses.description)
 async def load_description(message: types.Message, state=FSMContext):
-    if message.from_user.id == ID_MASTER or ID_ADMIN:
+    if message.from_user.id == ID_MASTER:
         async with state.proxy() as data_course:
             data_course['description'] = message.text
         await FSMcourses.next()
@@ -126,7 +108,7 @@ async def load_description(message: types.Message, state=FSMContext):
 # Бот ловит сообщение и сохраняет в словарь расписание занятий курса
 # @dp.message_handler(state=FSMcourses.timetable)
 async def load_timetable(message: types.Message, state=FSMContext):
-    if message.from_user.id == ID_MASTER or ID_ADMIN:
+    if message.from_user.id == ID_MASTER:
         async with state.proxy() as data_course:
             data_course['timetable'] = message.text
         await FSMcourses.next()
@@ -136,7 +118,7 @@ async def load_timetable(message: types.Message, state=FSMContext):
 # Бот ловит сообщение и сохраняет в словарь время продолжительности одного урока
 # @dp.message_handler(state=FSMcourses.duration_of_lesson)
 async def load_duration(message: types.Message, state=FSMContext):
-    if message.from_user.id == ID_MASTER or ID_ADMIN:
+    if message.from_user.id == ID_MASTER:
         async with state.proxy() as data_course:
             data_course['duration_of_lesson'] = message.text
         await FSMcourses.next()
@@ -146,22 +128,22 @@ async def load_duration(message: types.Message, state=FSMContext):
 # Бот ловит сообщение и сохраняет в словарь стоимость урока
 # @dp.message_handler(state=FSMcourses.price_of_lesson)
 async def load_price(message: types.Message, state=FSMContext):
-    if message.from_user.id == ID_MASTER or ID_ADMIN:
+    if message.from_user.id == ID_MASTER:
         async with state.proxy() as data_course:
             data_course['price_of_lesson'] = float(message.text)
 
-        await sqlite_db.sql_add_command_courses(state)
+        await sqlite_db.sql_add_commands_courses(state)
         await state.finish()
         await message.reply('Загрузка информации об курсе/тренировке окончена')
 
 
-    """Запуск FSM для внесения информации об учителях
-    """
+"""Запуск FSM для внесения информации об учителях
+"""
 # Начало загрузки данных от учителе
-# @dp.message_handler(commands=['Внести-Учителя'], state=None)
+# @dp.message_handler(commands=['загрузить_учителя'], state=None)
 
 async def add_teacher(message: types.Message):
-    if message.from_user.id == ID_MASTER or ID_ADMIN:
+    if message.from_user.id == ID_MASTER:
         await FSMteacher.name.set()
         await message.reply('Загрузи ФИО учителя')
 
@@ -169,7 +151,7 @@ async def add_teacher(message: types.Message):
 # Бот ловит ответ и пишет в словарь имя учителя
 # @dp.message_handler(state=FSMteacher.name)
 async def load_name(message: types.Message, state=FSMContext):
-    if message.from_user.id == ID_MASTER or ID_ADMIN:
+    if message.from_user.id == ID_MASTER:
         async with state.proxy() as data_teacher:
             data_teacher['name'] = message.text
         await FSMteacher.next()
@@ -180,7 +162,7 @@ async def load_name(message: types.Message, state=FSMContext):
 # @dp.message_handler(content_types=['photo'], state=FSMteacher.photo)
 
 async def load_teacher_photo(message: types.Message, state=FSMContext):
-    if message.from_user.id == ID_MASTER or ID_ADMIN:
+    if message.from_user.id == ID_MASTER:
         async with state.proxy() as data_teacher:
             data_teacher['photo'] = message.photo[0].file_id
         await FSMteacher.next()
@@ -191,7 +173,7 @@ async def load_teacher_photo(message: types.Message, state=FSMContext):
 # @dp.message_handler(state=FSMteacher.description)
 
 async def load_teacher_description(message: types.Message, state=FSMContext):
-    if message.from_user.id == ID_MASTER or ID_ADMIN:
+    if message.from_user.id == ID_MASTER:
         async with state.proxy() as data_teacher:
             data_teacher['description'] = message.text
         await FSMteacher.next()
@@ -202,24 +184,31 @@ async def load_teacher_description(message: types.Message, state=FSMContext):
 
 
 async def load_teacher_courses(message: types.Message, state=FSMContext):
-    if message.from_user.id == ID_MASTER or ID_ADMIN:
+    if message.from_user.id == ID_MASTER:
         async with state.proxy() as data_teacher:
             data_teacher['courses'] = message.text
 
-        await sqlite_db.sql_add_command_teachers(state)
+        await sqlite_db.sql_add_commands_teachers(state)
         await state.finish()
         await message.reply('Загрузка информации об учителе окончена')
+
+
+#@dp.message_handler() # Фильтрация спама и мата в чате менеджерской части
+# async def clean_manage_chat(message: types.Message):
+#     if message.text not in manage_commands:
+#         await message.delete()
+#         await bot.send_message(message.from_user.id, 'Бот Вас не понял, пожалуйста воспользуйтесь командами на клавиатуре')
 
 
 """Регистрируем хендлеры
 """
 
 
-def register_handlers_manage(dp: Dispatcher):
+def handlers_register_manage(dp: Dispatcher):
     # FSM для курсов
-    dp.register_message_handler(verify_admin, commands=['moderator'])
+    dp.register_message_handler(verify_owner, commands=['moderate'])
     dp.register_message_handler(
-        add_course, commands=['Внести-Курс'], state=None)
+        add_course, commands=['загрузить_курс'], state=None)
     dp.register_message_handler(
         cancel_state, state="*", commands=['отмена', 'stop'])
     dp.register_message_handler(cancel_state, F.text.contains(
@@ -234,9 +223,10 @@ def register_handlers_manage(dp: Dispatcher):
 
     # FSM для учителей
     dp.register_message_handler(add_teacher, commands=[
-                                'Внести-Учителя'], state=None)
+                                'загрузить_учителя'], state=None)
     dp.register_message_handler(load_name, state=FSMteacher.name)
     dp.register_message_handler(load_teacher_photo, content_types=['photo'], state=FSMteacher.photo)
     dp.register_message_handler(
         load_teacher_description, state=FSMteacher.description)
     dp.register_message_handler(load_teacher_courses, state=FSMteacher.courses)
+    #dp.register_message_handler(clean_manage_chat)

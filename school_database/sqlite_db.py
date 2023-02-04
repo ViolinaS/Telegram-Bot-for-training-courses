@@ -1,34 +1,57 @@
 import sqlite3 as sq
+from create_bot import bot
+from aiogram import types
 
-def courses_base_sql():
-    global base_courses, cur
-    base_courses = sq.connect('courses_db')
-    cur = base_courses.cursor()
-    if base_courses:
-        print('Database courses connected')
-    base_courses.execute('CREATE TABLE IF NOT EXISTS курсы(title Text PRIMARY KEY, photo Text, description Text,\
-                         timetable Text, duration_of_lesson Text, price_of_lesson Integer)')
-    base_courses.commit()
-    
-def teacher_base_sql():
-    global base_teacher, cursor
-    base_teacher = sq.connect('teachers_db')
-    cursor = base_teacher.cursor()
-    if base_teacher:
-        print('Database teachers connected')
-    base_teacher.execute('CREATE TABLE IF NOT EXISTS учителя(name Text PRIMARY KEY, photo Text,\
-                         description Text, courses Text)')
-    base_teacher.commit()
-    
 
-async def sql_add_command_courses(state):
+def bot_tables_sql():
+    global base_sql
+    global cur
+    base_sql = sq.connect('bot_sql.db')
+    cur = base_sql.cursor()
+    
+    if base_sql == True:
+        print('Database connected')
+    cur.execute("""CREATE TABLE IF NOT EXISTS courses(
+        title Text PRIMARY KEY, 
+        photo Text, 
+        description Text,                         
+        timetable Text, 
+        duration_of_lesson Text, 
+        price_of_lesson Text)""")
+    
+    cur.execute("""CREATE TABLE IF NOT EXISTS teachers(
+        name Text PRIMARY KEY, 
+        photo Text,
+        description Text, 
+        courses Text)""")
+    
+    base_sql.commit()
+    
+    
+async def sql_add_commands_courses(state):
     async with state.proxy() as data_course:
-        cur.execute('INSERT INTO курсы VALUES (?, ?, ?, ?, ?, ?)', tuple(data_course.values()))
-        base_courses.commit()
-        
+        cur.execute('INSERT INTO courses VALUES (?, ?, ?, ?, ?, ?)', tuple(data_course.values()))
+       
+    base_sql.commit() 
+    
+    
 
-async def sql_add_command_teachers(state):
+async def sql_add_commands_teachers(state):
     async with state.proxy() as data_teacher:
-        cursor.execute('INSERT INTO учителя VALUES (?, ?, ?, ?)', tuple(data_teacher.values()))
-        base_teacher.commit()
+        cur.execute('INSERT INTO teachers VALUES (?, ?, ?, ?)', tuple(data_teacher.values()))
+    
+    base_sql.commit() 
+   
+
+
+async def sql_read_from_courses(message: types.Message):
+    for info_c in cur.execute('SELECT * FROM courses').fetchall():
+        await bot.send_photo(message.from_user.id, info_c[1], 
+                             f'{info_c[0]}\nОписание: {info_c[2]}\nРасписание: {info_c[3]}\nПродолжительность тренировки:\
+                             {info_c[4]}\nСтоимоость тренировки: {info_c[5]}')
+
+async def sql_read_from_teachers(message: types.Message):
+    for info_t in cur.execute('SELECT * FROM teachers').fetchall():
+        await bot.send_photo(message.from_user.id, info_t[1], f'{info_t[0]}\nОписание: {info_t[2]}\nТренировки: {info_t[3]}')
+        
 

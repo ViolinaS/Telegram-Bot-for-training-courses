@@ -2,7 +2,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemo
 
 but1 = KeyboardButton('/Контакты')
 but2 = KeyboardButton('/Режим_работы')
-but3 = KeyboardButton('/Учебные_группы')
+but3 = KeyboardButton('/Тренировки')
 but4 = KeyboardButton('/Преподаватели')
 
 kb_client = ReplyKeyboardMarkup(resize_keyboard=True)
