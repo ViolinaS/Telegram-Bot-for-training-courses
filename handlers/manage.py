@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.filters import Text
 from magic_filter import F
-from create_bot import dp, bot, master_id, manage_commands
+from create_bot import dp, bot, master_id
 from school_database import sqlite_db
 from keyboards import kb_manage
 
@@ -14,7 +14,7 @@ from keyboards import kb_manage
 """
 
 ID_MASTER = int(master_id)
-print('айди', ID_MASTER)
+
 
 class FSMcourses(StatesGroup):
     title = State()
@@ -43,7 +43,7 @@ class FSMteacher(StatesGroup):
 async def verify_owner(message: types.Message):
     id_check = message.from_user.id
     if id_check == ID_MASTER:
-        await bot.send_message(message.from_user.id, 'Готов к работе', reply_markup=kb_manage)
+        await bot.send_message(message.from_user.id, 'Готов к работе, пожалуйста выбери команды на клавиатуре', reply_markup=kb_manage)
         
     else:
         await bot.send_message(message.from_user.id, 'Доступ запрещен')
@@ -193,12 +193,6 @@ async def load_teacher_courses(message: types.Message, state=FSMContext):
         await message.reply('Загрузка информации об учителе окончена')
 
 
-#@dp.message_handler() # Фильтрация спама и мата в чате менеджерской части
-# async def clean_manage_chat(message: types.Message):
-#     if message.text not in manage_commands:
-#         await message.delete()
-#         await bot.send_message(message.from_user.id, 'Бот Вас не понял, пожалуйста воспользуйтесь командами на клавиатуре')
-
 
 """Регистрируем хендлеры
 """
@@ -229,4 +223,4 @@ def handlers_register_manage(dp: Dispatcher):
     dp.register_message_handler(
         load_teacher_description, state=FSMteacher.description)
     dp.register_message_handler(load_teacher_courses, state=FSMteacher.courses)
-    #dp.register_message_handler(clean_manage_chat)
+    
