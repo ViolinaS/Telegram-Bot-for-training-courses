@@ -56,7 +56,7 @@ async def verify_owner(message: types.Message):
 """
 
 # Начало загрузки данных о курсе
-# @dp.message_handler(commands=['загрузить_курс'], state=None)
+# @dp.message_handler(Text(equals='Загрузить Курс', ignore_case=True), state=None)
 async def add_course(message: types.Message):
     if message.from_user.id == ID_MASTER:
         await FSMcourses.title.set()
@@ -65,8 +65,8 @@ async def add_course(message: types.Message):
 
 """Функция отмены, выход из state, если администратор передумал вносить правки в бота
 """
-# @dp.message_handler(state="*", commands=['отмена', 'stop'])
-# @dp.message_handler(F.text.contains(['отмена', 'stop']).lower(), state="*")
+#@dp.message_handler(Text(equals='Отмена Загрузки'), state="*")
+#@dp.message_handler(F.text.contains(['отмена', 'stop']).lower(), state="*")
 async def cancel_state(message: types.Message, state=FSMContext):
     current_state = await state.get_state()
     if current_state is None:
@@ -141,7 +141,7 @@ async def load_price(message: types.Message, state=FSMContext):
 """Запуск FSM для внесения информации об учителях
 """
 # Начало загрузки данных от учителе
-# @dp.message_handler(commands=['загрузить_учителя'], state=None)
+#@dp.message_handler(Text(equals='Загрузить Учителя', ignore_case=True), state=None)
 
 async def add_teacher(message: types.Message):
     if message.from_user.id == ID_MASTER:
@@ -203,7 +203,7 @@ async def inform_delete_callback(callback_query: types.CallbackQuery):
     await callback_query.answer(text=f'запись {callback_query.data.replace("del ", "")} удалена')
     
 
-#@dp.message_handler(commands=['удалить_курс'])
+#@dp.message_handler(Text(equals='Удалить Курс', ignore_case=True))
 async def delete_info(message: types.Message):
     if message.from_user.id == ID_MASTER:
         info = await sqlite_db.choose_delete_courses()
@@ -219,7 +219,7 @@ async def inform_delete_callback_teachers(callback_query: types.CallbackQuery):
     await callback_query.answer(text=f'запись {callback_query.data.replace("del ", "")} удалена')
     
 
-#@dp.message_handler(commands=['удалить_учителя'])
+#@dp.message_handler(Text(equals='Удалить Учителя', ignore_case=True))
 async def delete_teacher_info(message: types.Message):
     if message.from_user.id == ID_MASTER:
         info = await sqlite_db.choose_delete_teachers()
@@ -238,9 +238,9 @@ def handlers_register_manage(dp: Dispatcher):
     # FSM для курсов
     dp.register_message_handler(verify_owner, commands=['moderate'])
     dp.register_message_handler(
-        add_course, commands=['загрузить_курс'], state=None)
+        add_course, Text(equals='Загрузить Курс', ignore_case=True), state=None)
     dp.register_message_handler(
-        cancel_state, state="*", commands=['отмена_загрузки', 'stop'])
+        cancel_state, Text(equals='Отмена Загрузки'), state="*")
     dp.register_message_handler(cancel_state, F.text.contains(
         ['отмена', 'stop']).lower(), state="*")
     dp.register_message_handler(load_title, state=FSMcourses.title)
@@ -253,8 +253,7 @@ def handlers_register_manage(dp: Dispatcher):
     
 
     # FSM для учителей
-    dp.register_message_handler(add_teacher, commands=[
-                                'загрузить_учителя'], state=None)
+    dp.register_message_handler(add_teacher, Text(equals='Загрузить Учителя', ignore_case=True), state=None)
     dp.register_message_handler(load_name, state=FSMteacher.name)
     dp.register_message_handler(load_teacher_photo, content_types=['photo'], state=FSMteacher.photo)
     dp.register_message_handler(
@@ -263,6 +262,6 @@ def handlers_register_manage(dp: Dispatcher):
     
     # Удаление данных
     dp.register_callback_query_handler(inform_delete_callback, lambda x: x.data and x.data.startswith('del '))
-    dp.register_message_handler(delete_info, commands=['удалить_курс'])
+    dp.register_message_handler(delete_info, Text(equals='Удалить Курс', ignore_case=True))
     dp.callback_query_handler(inform_delete_callback_teachers, lambda x: x.data and x.data.startswith('del '))
-    dp.register_message_handler(delete_teacher_info, commands=['удалить_учителя'])
+    dp.register_message_handler(delete_teacher_info, Text(equals='Удалить Учителя', ignore_case=True))

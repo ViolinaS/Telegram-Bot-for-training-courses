@@ -15,5 +15,5 @@ bot_address = os.getenv('bot_name')
 
 master_id = os.getenv('master_id_owner')
 
-client_commands = ['start', 'help', 'Преподаватели', 'Тренировки', 'Режим работы',\
-    'Контакты', 'moderate', 'удалить_курс', 'отмена_загрузки', 'удалить_учителя']
+client_commands = ['/start', '/help', 'Преподаватели', 'Тренировки', 'Режим работы',\
+    'Контакты', '/moderate']
