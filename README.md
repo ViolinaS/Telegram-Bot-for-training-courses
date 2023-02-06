@@ -34,7 +34,7 @@
 
 ## Запуск Бота
 
-* Установить недостающие пакеты из [requirements.txt]("")
+* Установить недостающие пакеты из [requirements.txt](https://github.com/ViolinaS/SalesBot-for-training-courses/blob/main/requirements.txt)
 
 * Создать файл .env и прописать в нем:
 
