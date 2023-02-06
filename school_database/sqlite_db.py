@@ -46,13 +46,15 @@ async def sql_add_commands_teachers(state):
 
 async def sql_read_from_courses(message: types.Message):
     for info_c in cur.execute('SELECT * FROM courses').fetchall():
-        await bot.send_photo(message.from_user.id, info_c[1],
-                             f'{info_c[0]}\nОписание: {info_c[2]}\nРасписание: {info_c[3]}\nПродолжительность тренировки: {info_c[4]}\nСтоимость тренировки: {info_c[5]} рублей')
+        await bot.send_photo(message.from_user.id, info_c[1],\
+            f'{info_c[0]}\nОписание: {info_c[2]}\n'\
+                f'Расписание: {info_c[3]}\nПродолжительность тренировки: {info_c[4]}\nСтоимость тренировки: {info_c[5]} рублей')
 
 
 async def sql_read_from_teachers(message: types.Message):
     for info_t in cur.execute('SELECT * FROM teachers').fetchall():
-        await bot.send_photo(message.from_user.id, info_t[1], f'{info_t[0]}\nОписание: {info_t[2]}\nТренировки: {info_t[3]}')
+        await bot.send_photo(message.from_user.id, info_t[1], \
+            f'{info_t[0]}\nОписание: {info_t[2]}\nТренировки: {info_t[3]}')
 
 
 async def choose_delete_courses():
