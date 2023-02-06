@@ -1,6 +1,6 @@
 from aiogram import types, Dispatcher
 from aiogram.dispatcher.filters import Text
-from create_bot import dp, bot, bot_address, client_commands
+from create_bot import dp, bot, bot_address
 from keyboards import kb_client
 from school_database import sqlite_db
 
@@ -20,40 +20,34 @@ async def start_bot(message: types.Message):
         await message.reply(f'Пожалуйста напишите боту в ЛС: {bot_home}')
 
 
-#@dp.message_handler(commands=['Контакты'])
+#@dp.message_handler(Text(equals='Контакты', ignore_case=True))
 async def get_contacts(message: types.Message):
     address = "Yoga's Street, 00/00"
     phones = '+000 000-00-00'
     await bot.send_message(message.from_user.id, f'Адрес школы: {address} \nКонтактные номера: {phones}')
 
 
-#@dp.message_handler(commands=['Режим работы'])
+#@dp.message_handler(Text(equals='Режим работы', ignore_case=True))
 async def get_work_hours(message: types.Message):
     w_days = 'пн-вс'
     w_hours = '06.30–22.30'
     await bot.send_message(message.from_user.id, f'Время работы: {w_days} {w_hours}')
 
 
-#@dp.message_handler(commands=['Тренировки'])
+#@dp.message_handler(Text(equals='Тренировки', ignore_case=True))
 async def get_training_courses(message: types.Message):
     await sqlite_db.sql_read_from_courses(message)
 
 
-#@dp.message_handler(commands=['Преподаватели'])
+#@dp.message_handler(Text(equals='Преподаватели', ignore_case=True))
 async def get_trainers_info(message: types.Message):
     await sqlite_db.sql_read_from_teachers(message)
 
 
-#@dp.message_handler() # Фильтрация спама и мата в чате клиентской части
-# async def clean_chat(message: types.Message):
-#      if message.text not in client_commands:
-#          await message.delete()
-#          await bot.send_message(message.from_user.id, 'Бот Вас не понял, пожалуйста воспользуйтесь командами на клавиатуре')
-
 def handlers_register(dp: Dispatcher):
     dp.register_message_handler(start_bot, commands=['start', 'help'])
-    dp.register_message_handler(get_contacts, commands=['Контакты'])
-    dp.register_message_handler(get_work_hours, commands=['Режим_работы'])
-    dp.register_message_handler(get_training_courses, commands=['Тренировки'])
-    dp.register_message_handler(get_trainers_info, commands=['Преподаватели'])
-    #dp.register_message_handler(clean_chat)
+    dp.register_message_handler(get_contacts, Text(equals='Контакты', ignore_case=True))
+    dp.register_message_handler(get_work_hours, Text(equals='Режим работы', ignore_case=True))
+    dp.register_message_handler(get_training_courses, Text(equals='Тренировки', ignore_case=True))
+    dp.register_message_handler(get_trainers_info, Text(equals='Преподаватели', ignore_case=True))
+    
