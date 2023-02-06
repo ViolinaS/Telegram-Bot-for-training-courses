@@ -45,10 +45,10 @@ async def get_trainers_info(message: types.Message):
 
 
 #@dp.message_handler() # Фильтрация спама и мата в чате клиентской части
-async def clean_chat(message: types.Message):
-     if message.text not in client_commands:
-         await message.delete()
-         await bot.send_message(message.from_user.id, 'Бот Вас не понял, пожалуйста воспользуйтесь командами на клавиатуре')
+# async def clean_chat(message: types.Message):
+#      if message.text not in client_commands:
+#          await message.delete()
+#          await bot.send_message(message.from_user.id, 'Бот Вас не понял, пожалуйста воспользуйтесь командами на клавиатуре')
 
 def handlers_register(dp: Dispatcher):
     dp.register_message_handler(start_bot, commands=['start', 'help'])
@@ -56,4 +56,4 @@ def handlers_register(dp: Dispatcher):
     dp.register_message_handler(get_work_hours, commands=['Режим_работы'])
     dp.register_message_handler(get_training_courses, commands=['Тренировки'])
     dp.register_message_handler(get_trainers_info, commands=['Преподаватели'])
-    dp.register_message_handler(clean_chat)
+    #dp.register_message_handler(clean_chat)

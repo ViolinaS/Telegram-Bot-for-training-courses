@@ -2,6 +2,7 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.filters import Text
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from magic_filter import F
 from create_bot import dp, bot, master_id
 from school_database import sqlite_db
@@ -193,6 +194,41 @@ async def load_teacher_courses(message: types.Message, state=FSMContext):
         await message.reply('Загрузка информации об учителе окончена')
 
 
+"""Инлайн кнопки для удаления из базы сведений о тренировках/курсах и учителях
+"""
+
+#@dp.callback_query_handler(lambda x: x.data and x.data.startswith('del '))
+async def inform_delete_callback(callback_query: types.CallbackQuery):
+    await sqlite_db.delete_course(callback_query.data.replace('del ', ''))
+    await callback_query.answer(text=f'запись {callback_query.data.replace("del ", "")} удалена')
+    
+
+#@dp.message_handler(commands=['удалить_курс'])
+async def delete_info(message: types.Message):
+    if message.from_user.id == ID_MASTER:
+        info = await sqlite_db.choose_delete_courses()
+        for info_c in info:
+            await bot.send_photo(message.from_user.id, info_c[1], f'{info_c[0]}\nОписание: {info_c[2]}')
+            await bot.send_message(message.from_user.id, text='Удалить?', reply_markup=InlineKeyboardMarkup().\
+                add(InlineKeyboardButton(f'delete {info_c[0]}', callback_data=f'del {info_c[0]}')))
+
+
+#@dp.callback_query_handler(lambda x: x.data and x.data.startswith('del '))
+async def inform_delete_callback_teachers(callback_query: types.CallbackQuery):
+    await sqlite_db.delete_teacher(callback_query.data.replace('del ', ''))
+    await callback_query.answer(text=f'запись {callback_query.data.replace("del ", "")} удалена')
+    
+
+#@dp.message_handler(commands=['удалить_учителя'])
+async def delete_teacher_info(message: types.Message):
+    if message.from_user.id == ID_MASTER:
+        info = await sqlite_db.choose_delete_teachers()
+        for info_t in info:
+            await bot.send_photo(message.from_user.id, info_t[1], f'{info_t[0]}\nОписание: {info_t[2]}')
+            await bot.send_message(message.from_user.id, text='Удалить учителя?', reply_markup=InlineKeyboardMarkup().\
+                add(InlineKeyboardButton(f'delete {info_t[0]}', callback_data=f'del {info_t[0]}')))
+
+
 
 """Регистрируем хендлеры
 """
@@ -204,7 +240,7 @@ def handlers_register_manage(dp: Dispatcher):
     dp.register_message_handler(
         add_course, commands=['загрузить_курс'], state=None)
     dp.register_message_handler(
-        cancel_state, state="*", commands=['отмена', 'stop'])
+        cancel_state, state="*", commands=['отмена_загрузки', 'stop'])
     dp.register_message_handler(cancel_state, F.text.contains(
         ['отмена', 'stop']).lower(), state="*")
     dp.register_message_handler(load_title, state=FSMcourses.title)
@@ -214,6 +250,7 @@ def handlers_register_manage(dp: Dispatcher):
     dp.register_message_handler(
         load_duration, state=FSMcourses.duration_of_lesson)
     dp.register_message_handler(load_price, state=FSMcourses.price_of_lesson)
+    
 
     # FSM для учителей
     dp.register_message_handler(add_teacher, commands=[
@@ -224,3 +261,8 @@ def handlers_register_manage(dp: Dispatcher):
         load_teacher_description, state=FSMteacher.description)
     dp.register_message_handler(load_teacher_courses, state=FSMteacher.courses)
     
+    # Удаление данных
+    dp.register_callback_query_handler(inform_delete_callback, lambda x: x.data and x.data.startswith('del '))
+    dp.register_message_handler(delete_info, commands=['удалить_курс'])
+    dp.callback_query_handler(inform_delete_callback_teachers, lambda x: x.data and x.data.startswith('del '))
+    dp.register_message_handler(delete_teacher_info, commands=['удалить_учителя'])
