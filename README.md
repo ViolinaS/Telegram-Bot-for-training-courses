@@ -1,7 +1,7 @@
 # Шаблон информационного Telegram Бота для школы или курсов
 
 ## *A template used as base to run Telegram bots for training courses*
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white) 
+![SQLite](https://img.shields.io/badge/database-SQLite-9cf) ![Aiogram](https://img.shields.io/badge/Telegram-aiogram-9cf) ![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10-9cf)
 
 ## Основные возможности бота
 
